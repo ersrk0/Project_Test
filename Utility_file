@@ -1,0 +1,51 @@
+public DocumentDownloadResponse createBulkInviteTemplate(List<SellerDivision> divisionList, Map<Long, String> roleCodeAndNameMap) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Bulk Invite Template");
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("S.no.");
+            headerRow.createCell(1).setCellValue("Email");
+            headerRow.createCell(2).setCellValue("Role");
+            headerRow.createCell(3).setCellValue("Division");
+ 
+            // Make headers non-editable
+            CellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setLocked(true);
+            for (int i = 0; i < 4; i++) {
+                headerRow.getCell(i).setCellStyle(headerStyle);
+            }
+ 
+            DataValidationHelper validationHelper = new XSSFDataValidationHelper((org.apache.poi.xssf.usermodel.XSSFSheet) sheet);
+            DataValidationConstraint emailConstraint = validationHelper.createCustomConstraint("ISNUMBER(SEARCH(\"@\",INDIRECT(ADDRESS(ROW(),COLUMN()))))");
+            CellRangeAddressList emailAddressList = new CellRangeAddressList(1, 100, 1, 1);
+            DataValidation emailValidation = validationHelper.createValidation(emailConstraint, emailAddressList);
+            emailValidation.setShowErrorBox(true);
+            sheet.addValidationData(emailValidation);
+ 
+            String[] roleNames = roleCodeAndNameMap.values().toArray(new String[0]);
+            DataValidationConstraint roleConstraint = validationHelper.createExplicitListConstraint(roleNames);
+            CellRangeAddressList roleAddressList = new CellRangeAddressList(1, 100, 2, 2);
+            DataValidation roleValidation = validationHelper.createValidation(roleConstraint, roleAddressList);
+            roleValidation.setSuppressDropDownArrow(true);
+            roleValidation.setShowErrorBox(true);
+            roleValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+            sheet.addValidationData(roleValidation);
+ 
+            String[] divisionNames = divisionList.stream().map(SellerDivision::getName).toArray(String[]::new);
+            DataValidationConstraint divisionConstraint = validationHelper.createExplicitListConstraint(divisionNames);
+            CellRangeAddressList divisionAddressList = new CellRangeAddressList(1, 100, 3, 3);
+            DataValidation divisionValidation = validationHelper.createValidation(divisionConstraint, divisionAddressList);
+            divisionValidation.setSuppressDropDownArrow(true);
+            divisionValidation.setShowErrorBox(true);
+            divisionValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+            sheet.addValidationData(divisionValidation);
+ 
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+ 
+            DocumentDownloadResponse response = new DocumentDownloadResponse();
+            response.setByteArrayResource(new ByteArrayResource(outputStream.toByteArray()));
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating Excel template", e);
+        }
+    }
