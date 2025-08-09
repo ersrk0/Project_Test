@@ -1,0 +1,12 @@
+@Transactional(rollbackOn = IOException.class)
+    public DocumentDownloadResponse downloadDocument()  {
+        log.info("Entering method: downloadDocument");
+        log.info("Generating bulk invite template");
+        DocumentDownloadResponse response = excelUtility.createBulkInviteTemplate(
+                divisionService.getDivisions(userContextUtility.getTenantId()),
+                LookupConstants.getInviteeTypeMap()
+        );
+        log.info("Bulk invite template generated successfully");
+        log.info("Exiting method: downloadDocument");
+        return response;
+       }
