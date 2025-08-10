@@ -1,0 +1,53 @@
+{
+    "incidentTypeLookup": "PRECONTRACT",
+    "moduleCode": "MOD-TRD-001",
+    "raisedByTypeLookup": "USER",
+    "raisedById": "USR20250709A1",
+    "raisedByRoleLookup": "BUYER",
+    "raisedAgainstTypeLookup": "SELLER",
+    "raisedAgainstRoleLookup": "SUPPLIER",
+    "incidentReasonLookup": "DELAYED_DELIVERY",
+    "issueTypeLookup": "LOGISTICS",
+    "incidentTitle": "Delayed Delivery of Laptops",
+    "incidentDescription": "The laptops ordered under contract CN-20250709-01 were not delivered by the expected date.",
+    "statusLookup": "Open",
+    "severityLookup": "Low",
+    "preContractData": [
+        {
+            "traderId": "TRD20250709A1",
+            "categoryCode": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "productId": "PRD20250709A1",
+            "catalogId": "CAT20250709A1",
+            "compId": "COMP20250709A1",
+            "skuId": "SKU20250709A1",
+            "brandId": "BRD20250709A1",
+            "serviceId": "SRV20250709A1"
+        }
+    ],
+    "postContractData": [],
+    "incidentDocMasterData": [
+        {
+            "docId": "DOC20250709A1",
+            "attachments": [
+                {
+                    "fileName": "invoice_laptops.pdf",
+                    "fileTypeLookup": "PDF",
+                    "fileSize": 204800,
+                    "uploadedByTypeLookup": "USER",
+                    "uploadedById": "USR20250709A1",
+                    "statusLookup": "Open"
+                }
+            ]
+        }
+    ],
+    "incidentStatusLogData": [
+        {
+            "actionTypeLookup": "CREATED",
+            "previousStatusLookup": null,
+            "currentStatusLookup": "Open",
+            "actionByTypeLookup": "USER",
+            "actionById": "USR20250709A1",
+            "remarks": "Incident created for delayed delivery."
+        }
+    ]
+}
