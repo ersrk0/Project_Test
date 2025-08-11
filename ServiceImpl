@@ -2,6 +2,7 @@ package in.gov.gem.app.incident.service.impl;
 
 import in.gov.gem.app.incident.domain.entity.*;
 import in.gov.gem.app.incident.domain.repository.*;
+import in.gov.gem.app.incident.request.IncidentDocMasterDTO;
 import in.gov.gem.app.incident.request.IncidentRequestDTO;
 import in.gov.gem.app.incident.service.IncidentService;
 import in.gov.gem.app.incident.transformer.IncidentTransformer;
@@ -23,72 +24,78 @@ public class IncidentServiceImpl implements IncidentService {
     private DebarmentDetailRepository debarmentDetailRepository;
     private IncidentStatusLogRepository incidentStatusLogRepository;
     private IncidentMasterRepository incidentMasterRepository;
-
+    private IncidentDocMasterRepository incidentDocMasterRepository;
+    private IncidentAttachmentRepository incidentAttachmentRepository;
     @Override
-    public void saveIncident(UUID incidentId,long id, String acceptLanguage, IncidentRequestDTO dto) throws IOException {
-        //UUID incidentPk = UUID.randomUUID(); // ✅ Always generate a fresh PK for master
-       // String incidentId = "INC-" + System.currentTimeMillis(); // ✅ Custom generated unique ID
-        // ✅ Map to IncidentMasterEntity
-        IncidentMasterEntity incidentMasterEntity = IncidentTransformer.toIncidentMasterEntity(id,incidentId ,dto);
-        incidentMasterEntity.setId(id); // Using given parameter
+    public void saveIncident(UUID incidentId, long id, String acceptLanguage, IncidentRequestDTO dto) throws IOException {
+        IncidentMasterEntity incidentMasterEntity = IncidentTransformer.toIncidentMasterEntity(id, incidentId, dto);
+        incidentMasterEntity.setId(id);
         incidentMasterEntity.setIncidentId(incidentId);
-        // ✅ Save IncidentMasterEntity first
         incidentMasterRepository.save(incidentMasterEntity);
-        // ✅ Save PreContractIncidentEntities if present
+        // PreContract data
         if (dto.getPreContractData() != null && !dto.getPreContractData().isEmpty()) {
-            List<PreContractIncidentEntity> preEntities =
-                    IncidentTransformer.toPreContractEntities(dto.getPreContractData(), id);
+            List<PreContractIncidentEntity> preEntities = IncidentTransformer.toPreContractEntities(dto.getPreContractData(), id);
             preEntities.forEach(e -> {
-                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
-                e.setIncidentMasterFk(id); // Set FK
+                e.setId(UUID.randomUUID().getMostSignificantBits());
+                e.setIncidentMasterFk(id);
             });
             preContractIncidentRepository.saveAll(preEntities);
         }
-        // ✅ Save PostContractIncidentEntities if present
+        // PostContract data
         if (dto.getPostContractData() != null && !dto.getPostContractData().isEmpty()) {
-            List<PostContractIncidentEntity> postEntities =
-                    IncidentTransformer.toPostContractEntities(dto.getPostContractData(), id);
+            List<PostContractIncidentEntity> postEntities = IncidentTransformer.toPostContractEntities(dto.getPostContractData(), id);
             postEntities.forEach(e -> {
-                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
-                e.setId(id); // Set FK
+                e.setId(UUID.randomUUID().getMostSignificantBits());
+                e.setIncidentMasterFk(id);
             });
             postContractIncidentRepository.saveAll(postEntities);
-            // ✅ Save DebarmentDetailEntities for each post contract record
+            // Debarment details inside post contract data
             dto.getPostContractData().forEach(postDto -> {
                 if (postDto.getDebarmentDetail() != null && !postDto.getDebarmentDetail().isEmpty()) {
-                    List<DebarmentDetailEntity> debarmentEntities =
-                            IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), id);
+                    List<DebarmentDetailEntity> debarmentEntities = IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), id);
                     debarmentEntities.forEach(d -> {
-                        d.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
-                        d.setId(id); // Set FK// FK to master
-                        // If linked to a specific post contract record, setPostContractPk() accordingly
+                        d.setId(UUID.randomUUID().getMostSignificantBits());
+                        d.setPostContractIncidentFk(id);
+                        // If needed, set postContractFk here
                     });
                     debarmentDetailRepository.saveAll(debarmentEntities);
                 }
             });
         }
-        // ✅ Save IncidentStatusLogEntities if present
+        // Incident Status Logs
         if (dto.getIncidentStatusLogData() != null && !dto.getIncidentStatusLogData().isEmpty()) {
-            List<IncidentStatusLogEntity> logEntities =
-                    IncidentTransformer.toStatusLogEntities(dto.getIncidentStatusLogData(), id);
+            List<IncidentStatusLogEntity> logEntities = IncidentTransformer.toStatusLogEntities(dto.getIncidentStatusLogData(), id);
             logEntities.forEach(e -> {
-                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
-                e.setId(id); // Set FK // FK
+                e.setId(UUID.randomUUID().getMostSignificantBits());
+                e.setIncidentMasterFk(id);
             });
             incidentStatusLogRepository.saveAll(logEntities);
+        }
+        // Incident Doc Master and Attachments
+        if (dto.getIncidentDocMasterData() != null && !dto.getIncidentDocMasterData().isEmpty()) {
+            for (IncidentDocMasterDTO docDto : dto.getIncidentDocMasterData()) {
+                IncidentDocMasterEntity docEntity = IncidentTransformer.toDocMasterEntity(docDto, id);
+                docEntity.setId(UUID.randomUUID().getMostSignificantBits());
+                docEntity.setIncidentMasterFk(id);
+                incidentDocMasterRepository.save(docEntity);
+                if (docDto.getAttachments() != null && !docDto.getAttachments().isEmpty()) {
+                    List<IncidentAttachmentEntity> attachmentEntities = IncidentTransformer.toAttachmentEntities(docDto.getAttachments(), id);
+                    attachmentEntities.forEach(att -> {
+                        att.setId(UUID.randomUUID().getMostSignificantBits());
+                        att.setIncidentDocMasterFk(docEntity.getId());
+                    });
+                    incidentAttachmentRepository.saveAll(attachmentEntities);
+                }
+            }
         }
         log.info("Incident saved successfully with IncidentId: {} and IncidentPk: {}", incidentId, id);
     }
     @Override
     public List<String> getReasons() {
-        return Arrays.asList(
-                "Catalog-based",
-                "Catalog_ID + SKUID based",
-                "Other"
-        );
+        return List.of("Catalog-based", "Catalog_ID + SKUID based", "Other");
     }
     @Override
     public List<String> getSeverities() {
-        return Arrays.asList("Low", "Medium", "High", "Critical");
+        return List.of("Low", "Medium", "High", "Critical");
     }
 }
