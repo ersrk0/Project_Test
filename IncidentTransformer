@@ -1,0 +1,138 @@
+package in.gov.gem.app.incident.transformer;
+
+import in.gov.gem.app.incident.domain.entity.*;
+import in.gov.gem.app.incident.request.*;
+import in.gov.gem.app.incident.response.IncidentResponseDTO;
+import org.springframework.stereotype.Component;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Component
+public class IncidentTransformer {
+    public static IncidentMasterEntity toIncidentMasterEntity(Long id,UUID incidentId , IncidentRequestDTO dto) {
+        if (dto == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: dto, incidentPk is null");
+        }
+        return IncidentMasterEntity.builder()
+                .incidentTypeLookup(dto.getIncidentTypeLookup())
+                .moduleCode(dto.getModuleCode())
+                .raisedByTypeLookup(dto.getRaisedByTypeLookup())
+                .raisedById(dto.getRaisedById())
+                .raisedByRoleLookup(dto.getRaisedByRoleLookup())
+                .raisedAgainstTypeLookup(dto.getRaisedAgainstTypeLookup())
+                .raisedAgainstRoleLookup(dto.getRaisedAgainstRoleLookup())
+                .incidentReasonLookup(dto.getIncidentReasonLookup())
+                .issueTypeLookup(dto.getIssueTypeLookup())
+                .incidentTitle(dto.getIncidentTitle())
+                .incidentDescription(dto.getIncidentDescription())
+                .statusLookup(dto.getStatusLookup())
+                .severityLookup(dto.getSeverityLookup())
+                .build();
+    }
+    public static IncidentDocMasterEntity toDocMasterEntity(IncidentDocMasterDTO dto, Long id) {
+        if (dto == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: dto or incidentPk is null");
+        }
+        return IncidentDocMasterEntity.builder()
+                .id(UUID.randomUUID().getMostSignificantBits())
+                .docId(UUID.fromString(dto.getDocId()))
+                .build();
+    }
+    public static List<IncidentAttachmentEntity> toAttachmentEntities(List<AttachmentDTO> dtos, Long id) {
+        if (dtos == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: attachment list or incidentPk is null");
+        }
+        return dtos.stream()
+                .map(dto -> IncidentAttachmentEntity.builder()
+                        .id(UUID.randomUUID().getMostSignificantBits())
+                        .fileName(dto.getFileName())
+                        .filePath(dto.getFilePath() != null ? dto.getFilePath().getOriginalFilename() : null)
+                        .fileSize(BigInteger.valueOf(dto.getFileSize()))
+                        .fileTypeLookup(dto.getFileTypeLookup())
+                        //.uploadedByTypeLookup(dto.getUploadedByTypeLookup())
+                        //.uploadedById(dto.getUploadedById())
+                        //.statusLookup(dto.getStatusLookup())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    public static List<PostContractIncidentEntity> toPostContractEntities(List<PostContractDataDTO> dtos, Long id) {
+        if (dtos == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: postContract list or incidentPk is null");
+        }
+        return dtos.stream()
+                .map(dto -> PostContractIncidentEntity.builder()
+                        .id(UUID.randomUUID().getMostSignificantBits())
+                        .auctionId(dto.getAuctionId())
+                        .bidId(dto.getBidId())
+                        .orderId(dto.getOrderId())
+                        .productId(dto.getProductId())
+                        .contractNo(dto.getContractNo())
+                        .invoiceId(dto.getInvoiceId())
+                        .panNo(dto.getPanNo())
+                        .isDebarred(dto.getIsDebarred())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    public static List<DebarmentDetailEntity> toDebarmentEntities(List<DebarmentDetailDTO> dtos, Long id) {
+        if (dtos == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: debarment list or incidentPk is null");
+        }
+        return dtos.stream()
+                .map(dto -> DebarmentDetailEntity.builder()
+                        .id(UUID.randomUUID().getMostSignificantBits())
+                        .debarmentClauseLookup(dto.getDebarmentClauseLookup())
+                        .debarmentStartDate(dto.getDebarmentStartDate())
+                        .debarmentEndDate(dto.getDebarmentEndDate())
+                        .competentAuthorityName(dto.getCompetentAuthorityName())
+                        .competentAuthorityDesignation(dto.getCompetentAuthorityDesignation())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    public static List<PreContractIncidentEntity> toPreContractEntities(List<PreContractDataDTO> dtos, Long id) {
+        if (dtos == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: preContract list or incidentPk is null");
+        }
+        return dtos.stream()
+                .map(dto -> PreContractIncidentEntity.builder()
+                        .id(UUID.randomUUID().getMostSignificantBits())
+                        .traderId(dto.getTraderId())
+                        .categoryCode(dto.getCategoryCode())
+                        .productId(dto.getProductId())
+                        .catalogId(dto.getCatalogId())
+                        .compId(dto.getCompId())
+                        .skuId(dto.getSkuId())
+                        .brandId(dto.getBrandId())
+                        .serviceId(dto.getServiceId())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    public static List<IncidentStatusLogEntity> toStatusLogEntities(List<IncidentStatusLogDTO> dtos, Long id) {
+        if (dtos == null || id == null) {
+            throw new IllegalArgumentException("Invalid input: status log list or incidentPk is null");
+        }
+        return dtos.stream()
+                .map(dto -> IncidentStatusLogEntity.builder()
+                        .id(UUID.randomUUID().getMostSignificantBits())
+                        .actionTypeLookup(dto.getActionTypeLookup())
+                        .previousStatusLookup(dto.getPreviousStatusLookup())
+                        .currentStatusLookup(dto.getCurrentStatusLookup())
+                        .actionByTypeLookup(dto.getActionByTypeLookup())
+                        .actionById(dto.getActionById())
+                        .remarks(dto.getRemarks())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    public static IncidentResponseDTO toResponseDTO(String incidentId, String title, String description) {
+        if (incidentId == null || title == null || description == null) {
+            throw new IllegalArgumentException("Invalid input: incidentId, title, or description is null");
+        }
+        return IncidentResponseDTO.builder()
+                .incidentId(incidentId)
+                .incidentTitle(title)
+                .incidentDescription(description)
+                .build();
+    }
+}
