@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 @Entity
@@ -19,12 +21,10 @@ import java.util.UUID;
 public class PostContractIncidentEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Numeric auto-increment ID
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    // FK ID field
-    @Column(name = "incident_master_fk", nullable = false)
+    @Column(name = "incident_master_fk", insertable=false, updatable=false,nullable = false)
     private Long incidentMasterFk;
     @Column(name = "auction_id")
     private String auctionId;
@@ -46,14 +46,14 @@ public class PostContractIncidentEntity extends BaseEntity {
     private String panNo;
     @Column(name = "is_debarred")
     private Boolean isDebarred;
-    @Column(name = "created_by")
+    /*@Column(name = "created_by")
     private String createdBy;
-    @Column(name = "created_at")
-    private java.sql.Timestamp createdAt;
+    @Column(name = "created_at", insertable=false, updatable=false)
+    private Date createdAt;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "updated_at")
-    private java.sql.Timestamp updatedAt;
+    private Date updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
     @Column(name = "channel_id")
@@ -61,12 +61,10 @@ public class PostContractIncidentEntity extends BaseEntity {
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
-    private String updatedByAppVersion;
-    // Correct mapping to DebarmentDetailEntity
+    private String updatedByAppVersion;*/
     @OneToMany(mappedBy = "postContractIncident", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DebarmentDetailEntity> debarmentDetails;
-    // Relationship with IncidentMasterEntity
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incident_master_fk", insertable = false, updatable = false)
+    @JoinColumn(name = "incident_master_fk", insertable=false, updatable=false)
     private IncidentMasterEntity incidentMaster;
 }
