@@ -6,6 +6,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.security.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 @Entity
@@ -17,16 +18,13 @@ import java.util.UUID;
 @SuperBuilder
 public class DebarmentDetailEntity extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment numeric ID
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     @Column(name = "debarment_id")
     private UUID debarmentId;
-    // FK ID field
-    @Column(name = "post_contract_incident_fk", nullable = false)
+    @Column(name = "post_contract_incident_fk",insertable=false, updatable=false, nullable = false)
     private Long postContractIncidentFk;
-    // Relationship
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_contract_incident_fk", insertable = false, updatable = false)
     private PostContractIncidentEntity postContractIncident;
@@ -40,14 +38,14 @@ public class DebarmentDetailEntity extends BaseEntity {
     private String competentAuthorityName;
     @Column(name = "competent_authority_designation")
     private String competentAuthorityDesignation;
-    @Column(name = "created_by")
+   /* @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
-    private java.sql.Timestamp createdAt;
+    private Date createdAt;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "updated_at")
-    private java.sql.Timestamp updatedAt;
+    private LocalDateTime updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
     @Column(name = "channel_id")
@@ -55,5 +53,5 @@ public class DebarmentDetailEntity extends BaseEntity {
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
-    private String updatedByAppVersion;
+    private String updatedByAppVersion;*/
 }
