@@ -7,10 +7,11 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigInteger;
 import java.security.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 @Entity
-@Table(name = "incident_attachment")
+@Table(name = "doc_attachment")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,13 +19,12 @@ import java.util.UUID;
 @SuperBuilder
 public class IncidentAttachmentEntity extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // use IDENTITY for Long IDs
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     @Column(name = "attachment_id")
     private UUID attachmentId;
-    @Column(name = "incident_doc_master_fk", nullable = false)
+    @Column(name = "incident_doc_master_fk",insertable=false, updatable=false, nullable = false)
     private Long incidentDocMasterFk;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incident_doc_master_fk", insertable = false, updatable = false)
@@ -37,14 +37,14 @@ public class IncidentAttachmentEntity extends BaseEntity {
     private String filePath;
     @Column(name = "file_size")
     private BigInteger fileSize;
-    @Column(name = "created_by")
+   /* @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
     @Column(name = "updated_by")
-    private String updateBy;
+    private String updatedBy; // fixed naming
     @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
     @Column(name = "channel_id")
@@ -52,5 +52,5 @@ public class IncidentAttachmentEntity extends BaseEntity {
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
-    private String updatedByAppVersion;
+    private String updatedByAppVersion;*/
 }
