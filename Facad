@@ -13,7 +13,7 @@ import in.gov.gem.app.incident.service.IncidentService;
 //import in.gov.gem.app.incident.service.impl.SequenceGenerateService;
 import in.gov.gem.app.incident.service.impl.SequenceGenerateService;
 import in.gov.gem.app.incident.transformer.IncidentTransformer;
-import in.gov.gem.app.incident.utility.ExcelUtility;
+//import in.gov.gem.app.incident.utility.ExcelUtility;
 import in.gov.gem.app.service.core.utility.MessageUtility;
 import in.gov.gem.app.service.dto.CoreLookupDto;
 import in.gov.gem.app.service.pack.service.interfaces.CoreLookupService;
@@ -44,70 +44,79 @@ public class IncidentFacadeImpl implements IncidentFacade {
     private final IncidentService incidentService;
     private final IncidentTransformer incidentTransformer;
     private final MessageUtility messageUtility;
-    private final ExcelUtility excelUtility;
-    private final SequenceGenerateService sequenceGenerateService;
+   // private final ExcelUtility excelUtility;
+    //private final SequenceGenerateService sequenceGenerateService;
     private final in.gov.gem.app.incident.domain.repository.IncidentMasterRepository incidentMasterRepository;
     @Override
     @Transactional
     public IncidentMasterEntity saveIncident(String acceptLanguage, IncidentRequestDTO incidentRequestDTO) throws IOException {
         UUID uuid = UUID.randomUUID();
         long id = uuid.getMostSignificantBits();
-        UUID incidentId = sequenceGenerateService.generateInc();
-        IncidentMasterEntity incidentMasterEntity = incidentTransformer.toIncidentMasterEntity(id,incidentId, incidentRequestDTO);
+        UUID incidentId =UUID.randomUUID();
+        IncidentMasterEntity incidentMasterEntity =
+                incidentTransformer.toIncidentMasterEntity(id, incidentId, incidentRequestDTO);
         incidentMasterEntity.setId(id);
         incidentMasterEntity.setIncidentId(incidentId);
-        // Set PreContractData and link parent
+        // ------------------ PreContractData ------------------
         if (incidentRequestDTO.getPreContractData() != null && !incidentRequestDTO.getPreContractData().isEmpty()) {
-            List<PreContractIncidentEntity> preContracts = IncidentTransformer.toPreContractEntities(incidentRequestDTO.getPreContractData(), id);
+            List<PreContractIncidentEntity> preContracts =
+                    IncidentTransformer.toPreContractEntities(incidentRequestDTO.getPreContractData(), id);
             preContracts.forEach(pc -> pc.setIncidentMaster(incidentMasterEntity));
             incidentMasterEntity.setPreContractData(preContracts);
         }
-        // Set PostContractData and link parent
+        // ------------------ PostContractData + Debarment ------------------
         if (incidentRequestDTO.getPostContractData() != null && !incidentRequestDTO.getPostContractData().isEmpty()) {
-            List<PostContractIncidentEntity> postContracts = IncidentTransformer.toPostContractEntities(incidentRequestDTO.getPostContractData(), id);
+            List<PostContractIncidentEntity> postContracts =
+                    IncidentTransformer.toPostContractEntities(incidentRequestDTO.getPostContractData(), id);
             postContracts.forEach(pc -> pc.setIncidentMaster(incidentMasterEntity));
-            incidentMasterEntity.setPostContractData(postContracts);
-            // Debarment details
-            incidentRequestDTO.getPostContractData().forEach(postDto -> {
+            // Debarment handling (same style as Document + Attachment)
+            for (int i = 0; i < incidentRequestDTO.getPostContractData().size(); i++) {
+                var postDto = incidentRequestDTO.getPostContractData().get(i);
+                var postEntity = postContracts.get(i);
                 if (postDto.getDebarmentDetail() != null && !postDto.getDebarmentDetail().isEmpty()) {
-                    List<DebarmentDetailEntity> debarments = IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), id);
-                    debarments.forEach(deb -> deb.setPostContractIncident(debarments));
-                    // Optional: You can add debarments to incidentMasterEntity if you have a field or save separately
+                    List<DebarmentDetailEntity> debarments =
+                            IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), id);
+                    debarments.forEach(deb -> deb.setPostContractIncident(postEntity));
+                    postEntity.setDebarmentDetails(debarments);
                 }
-            });
+            }
+            incidentMasterEntity.setPostContractData(postContracts);
         }
-        // Set Status Log and link parent
+        // ------------------ Status Log ------------------
         if (incidentRequestDTO.getIncidentStatusLogData() != null && !incidentRequestDTO.getIncidentStatusLogData().isEmpty()) {
-            List<IncidentStatusLogEntity> statusLogs = IncidentTransformer.toStatusLogEntities(incidentRequestDTO.getIncidentStatusLogData(), id);
+            List<IncidentStatusLogEntity> statusLogs =
+                    IncidentTransformer.toStatusLogEntities(incidentRequestDTO.getIncidentStatusLogData(), id);
             statusLogs.forEach(sl -> sl.setIncidentMaster(incidentMasterEntity));
             incidentMasterEntity.setIncidentStatusLogData(statusLogs);
         }
-        // Set Doc Master and Attachments
+        // ------------------ Document + Attachments ------------------
         if (incidentRequestDTO.getIncidentDocMasterData() != null && !incidentRequestDTO.getIncidentDocMasterData().isEmpty()) {
             List<IncidentDocMasterEntity> docMasters = incidentRequestDTO.getIncidentDocMasterData().stream()
                     .map(docDto -> {
                         IncidentDocMasterEntity docMaster = IncidentTransformer.toDocMasterEntity(docDto, id);
                         docMaster.setIncidentMaster(incidentMasterEntity);
                         if (docDto.getAttachments() != null && !docDto.getAttachments().isEmpty()) {
-                            List<IncidentAttachmentEntity> attachments = IncidentTransformer.toAttachmentEntities(docDto.getAttachments(), id);
+                            List<IncidentAttachmentEntity> attachments =
+                                    IncidentTransformer.toAttachmentEntities(docDto.getAttachments(), id);
                             attachments.forEach(att -> att.setIncidentDocMaster(docMaster));
                             docMaster.setAttachments(attachments);
                         }
                         return docMaster;
-                    }).toList();
+                    })
+                    .toList();
             incidentMasterEntity.setIncidentDocMasterData(docMasters);
         }
+        // ------------------ Save & Additional Service Call ------------------
         IncidentMasterEntity savedEntity = incidentMasterRepository.save(incidentMasterEntity);
         logger.info("Incident saved successfully with ID: {}", savedEntity.getIncidentId());
         // Optionally call service for additional processing
-        incidentService.saveIncident(incidentId,id,acceptLanguage, incidentRequestDTO);
+        incidentService.saveIncident(incidentId, id, acceptLanguage, incidentRequestDTO);
         return savedEntity;
     }
     @Override
     public DocumentDownloadResponse downloadIncidentTemplate() {
         List<String> reasons = incidentService.getReasons();
         List<String> severities = incidentService.getSeverities();
-        return excelUtility.createIncidentTemplate( reasons, severities);
+        return(null); //excelUtility.createIncidentTemplate(reasons, severities);
     }
-
 }
