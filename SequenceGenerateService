@@ -1,0 +1,64 @@
+package in.gov.gem.app.incident.service.impl;
+/*
+ * This source code and all associated intellectual property rights are
+ * exclusively owned by Government e-Marketplace (GeM) and are protected
+ * under applicable intellectual property laws. Any unauthorized use,
+ * reproduction,modification, or distribution of this code, in whole or
+ * in part,is strictly prohibited without the express prior written
+ * consent of GeM.
+ */
+
+
+import in.gov.gem.app.incident.domain.repository.IncidentMasterRepository;
+import in.gov.gem.app.incident.service.ISequenceGenerateService;
+import in.gov.gem.app.utility.CustomLoggerFactory;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+/**
+ * The type Sequence generate service.
+ */
+@Service
+@AllArgsConstructor
+public class SequenceGenerateService implements ISequenceGenerateService {
+    private IncidentMasterRepository incidentMasterRepository;
+    private final CustomLoggerFactory log = CustomLoggerFactory.getLogger(this.getClass());
+
+    /**
+     * Generate arn string.
+     *
+     * @return the string
+     */
+    @Override
+    public UUID generateInc() {
+        log.info("Generating INC for Incident ");
+        UUID currentDate = UUID.fromString(new SimpleDateFormat("ddMMyyyy").format(new Date()));
+
+        Long sequence = incidentMasterRepository.getNextSequenceValue();
+
+        return UUID.fromString("INC" + currentDate + sequence);
+
+    }
+
+    /**
+     * Gets email sequence map.
+     *
+     * @param stringStream the string stream
+     * @return the email sequence map
+     */
+    /*@Override
+    public Map<String, String> getEmailSequenceMap(Stream<String> stringStream) {
+        log.info("Generating email sequence map for Secondary Seller Profile");
+        return stringStream
+                .collect(java.util.stream.Collectors.toMap(
+                        email -> email,
+                        email -> generateInc()
+                ));
+    }*/
+}
