@@ -19,8 +19,7 @@ import java.util.UUID;
 @SuperBuilder
 public class IncidentMasterEntity extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // or UUID if preferred
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     @Column(name = "incident_id", unique = true)
@@ -51,30 +50,28 @@ public class IncidentMasterEntity extends BaseEntity {
     private String statusLookup;
     @Column(name = "severity_lookup")
     private String severityLookup;
-    @Column(name = "created_by")
+    /*@Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
     @Column(name = "updated_by")
-    private String updateBy;
+    private String updatedBy;
     @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-    /*@Column(name = "deleted_at")
-    private Timestamp deletedAt;*/
     @Column(name = "channel_id")
     private String channelId;
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
-    private String updatedByAppVersion;
-    @OneToMany(mappedBy = "incident_master", cascade = CascadeType.ALL, orphanRemoval = true)
+    private String updatedByAppVersion;*/
+    @OneToMany(mappedBy = "incidentMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PreContractIncidentEntity> preContractData;
-    @OneToMany(mappedBy = "incident_master", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "incidentMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostContractIncidentEntity> postContractData;
-    @OneToMany(mappedBy = "incident_master", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "incidentMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IncidentStatusLogEntity> incidentStatusLogData;
-    @OneToMany(mappedBy = "incident_master", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "incidentMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IncidentDocMasterEntity> incidentDocMasterData;
 }
