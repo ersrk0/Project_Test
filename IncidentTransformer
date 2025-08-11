@@ -39,6 +39,7 @@ public class IncidentTransformer {
         return IncidentDocMasterEntity.builder()
                 .id(UUID.randomUUID().getMostSignificantBits())
                 .docId(UUID.fromString(dto.getDocId()))
+                .incidentMasterFk(id)
                 .build();
     }
     public static List<IncidentAttachmentEntity> toAttachmentEntities(List<AttachmentDTO> dtos, Long id) {
