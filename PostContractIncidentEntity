@@ -17,13 +17,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 public class PostContractIncidentEntity extends BaseEntity {
+
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incident_master_fk",insertable = false,updatable = false, nullable = false)
+    // FK ID field
+    @Column(name = "incident_master_fk", nullable = false)
     private Long incidentMasterFk;
     @Column(name = "auction_id")
     private String auctionId;
@@ -48,24 +49,24 @@ public class PostContractIncidentEntity extends BaseEntity {
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private java.sql.Timestamp createdAt;
     @Column(name = "updated_by")
-    private String updateBy;
+    private String updatedBy;
     @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    private java.sql.Timestamp updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-    /*@Column(name = "deleted_at")
-    private Timestamp deletedAt;*/
     @Column(name = "channel_id")
     private String channelId;
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
     private String updatedByAppVersion;
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DebarmentDetailEntity> debarmentDetail;
+    // Correct mapping to DebarmentDetailEntity
+    @OneToMany(mappedBy = "postContractIncident", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DebarmentDetailEntity> debarmentDetails;
+    // Relationship with IncidentMasterEntity
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incident_master_fk",insertable = false,updatable = false, nullable = false)
+    @JoinColumn(name = "incident_master_fk", insertable = false, updatable = false)
     private IncidentMasterEntity incidentMaster;
 }
