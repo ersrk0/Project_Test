@@ -24,9 +24,11 @@ public class IncidentDocMasterEntity extends BaseEntity {
     private Long id;
     @Column(name = "doc_id")
     private UUID docId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incident_master_fk",insertable = false,updatable = false, nullable = false)
+    @Column(name = "incident_master_fk", nullable = false)
     private Long incidentMasterFk;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "incident_master_fk", insertable = false, updatable = false)
+    private IncidentMasterEntity incidentMaster;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
@@ -37,17 +39,12 @@ public class IncidentDocMasterEntity extends BaseEntity {
     private Timestamp updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-    /*@Column(name = "deleted_at")
-    private Timestamp deletedAt;*/
     @Column(name = "channel_id")
     private String channelId;
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
     private String updatedByAppVersion;
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "incidentDocMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IncidentAttachmentEntity> attachments;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incident_master_fk", insertable = false,updatable = false,nullable = false)
-    private IncidentMasterEntity incidentMaster;
 }
