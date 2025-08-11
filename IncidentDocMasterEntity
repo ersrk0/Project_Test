@@ -18,23 +18,22 @@ import java.util.UUID;
 @SuperBuilder
 public class IncidentDocMasterEntity extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // using numeric PK
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     @Column(name = "doc_id")
     private UUID docId;
-    @Column(name = "incident_master_fk", nullable = false)
+    @Column(name = "incident_master_fk",insertable=false, updatable=false, nullable = false)
     private Long incidentMasterFk;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incident_master_fk", insertable = false, updatable = false)
     private IncidentMasterEntity incidentMaster;
-    @Column(name = "created_by")
+    /*@Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
     private Timestamp createdAt;
     @Column(name = "updated_by")
-    private String updateBy;
+    private String updatedBy;
     @Column(name = "updated_at")
     private Timestamp updatedAt;
     @Column(name = "is_deleted")
@@ -44,7 +43,7 @@ public class IncidentDocMasterEntity extends BaseEntity {
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
-    private String updatedByAppVersion;
+    private String updatedByAppVersion;*/
     @OneToMany(mappedBy = "incidentDocMaster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IncidentAttachmentEntity> attachments;
 }
