@@ -22,10 +22,14 @@ public class DebarmentDetailEntity extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     @Column(name = "debarment_id")
-    private UUID debarmentid;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_contract_incident_fk", insertable = false,updatable = false,nullable = false)
+    private UUID debarmentId;
+    // FK ID field
+    @Column(name = "post_contract_incident_fk", nullable = false)
     private Long postContractIncidentFk;
+    // Relationship
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_contract_incident_fk", insertable = false, updatable = false)
+    private PostContractIncidentEntity postContractIncident;
     @Column(name = "debarment_clause_lookup")
     private String debarmentClauseLookup;
     @Column(name = "debarment_start_date")
@@ -39,22 +43,17 @@ public class DebarmentDetailEntity extends BaseEntity {
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private java.sql.Timestamp createdAt;
     @Column(name = "updated_by")
-    private String updateBy;
+    private String updatedBy;
     @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    private java.sql.Timestamp updatedAt;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-    /*@Column(name = "deleted_at")
-    private Timestamp deletedAt;*/
     @Column(name = "channel_id")
     private String channelId;
     @Column(name = "created_by_app_version")
     private String createdByAppVersion;
     @Column(name = "updated_by_app_version")
     private String updatedByAppVersion;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_contract_incident_fk", nullable = false)
-    private PostContractIncidentEntity postContractEntity;
 }
