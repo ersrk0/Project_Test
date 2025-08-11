@@ -24,54 +24,61 @@ public class IncidentServiceImpl implements IncidentService {
     private IncidentStatusLogRepository incidentStatusLogRepository;
     private IncidentMasterRepository incidentMasterRepository;
 
-    public void saveIncident(long id, String acceptLanguage, IncidentRequestDTO dto) throws IOException{
-        IncidentMasterEntity incidentMasterEntity = IncidentTransformer.toIncidentMasterEntity(incidentPk.toString(), dto);
-        incidentMasterEntity.setId(id);
-        //incidentMasterEntity.setIncidentId(incidentId);
-        // 4. Save IncidentMasterEntity first (so that child entities can reference it)
+    @Override
+    public void saveIncident(UUID incidentId,long id, String acceptLanguage, IncidentRequestDTO dto) throws IOException {
+        //UUID incidentPk = UUID.randomUUID(); // ✅ Always generate a fresh PK for master
+       // String incidentId = "INC-" + System.currentTimeMillis(); // ✅ Custom generated unique ID
+        // ✅ Map to IncidentMasterEntity
+        IncidentMasterEntity incidentMasterEntity = IncidentTransformer.toIncidentMasterEntity(id,incidentId ,dto);
+        incidentMasterEntity.setId(id); // Using given parameter
+        incidentMasterEntity.setIncidentId(incidentId);
+        // ✅ Save IncidentMasterEntity first
         incidentMasterRepository.save(incidentMasterEntity);
-        // 5. Save PreContractIncidentEntities if present
+        // ✅ Save PreContractIncidentEntities if present
         if (dto.getPreContractData() != null && !dto.getPreContractData().isEmpty()) {
             List<PreContractIncidentEntity> preEntities =
-                    IncidentTransformer.toPreContractEntities(dto.getPreContractData(), );
-            preEntities.forEach(e -> e.setId(incidentMasterEntity)); // Set FK
+                    IncidentTransformer.toPreContractEntities(dto.getPreContractData(), id);
+            preEntities.forEach(e -> {
+                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
+                e.setIncidentMasterFk(id); // Set FK
+            });
             preContractIncidentRepository.saveAll(preEntities);
         }
-        // 6. Save PostContractIncidentEntities if present, along with their debarment details
+        // ✅ Save PostContractIncidentEntities if present
         if (dto.getPostContractData() != null && !dto.getPostContractData().isEmpty()) {
             List<PostContractIncidentEntity> postEntities =
-                    IncidentTransformer.toPostContractEntities(dto.getPostContractData(), incidentPk);
-            postEntities.forEach(e -> e.setIncidentPk(incidentMasterEntity)); // Set FK
+                    IncidentTransformer.toPostContractEntities(dto.getPostContractData(), id);
+            postEntities.forEach(e -> {
+                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
+                e.setId(id); // Set FK
+            });
             postContractIncidentRepository.saveAll(postEntities);
-            // Save DebarmentDetailEntities for each post contract record
+            // ✅ Save DebarmentDetailEntities for each post contract record
             dto.getPostContractData().forEach(postDto -> {
                 if (postDto.getDebarmentDetail() != null && !postDto.getDebarmentDetail().isEmpty()) {
                     List<DebarmentDetailEntity> debarmentEntities =
-                            IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), incidentPk);
-                    debarmentEntities.forEach(d -> d.setPostContractPk(null)); // Set FK if applicable
+                            IncidentTransformer.toDebarmentEntities(postDto.getDebarmentDetail(), id);
+                    debarmentEntities.forEach(d -> {
+                        d.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
+                        d.setId(id); // Set FK// FK to master
+                        // If linked to a specific post contract record, setPostContractPk() accordingly
+                    });
                     debarmentDetailRepository.saveAll(debarmentEntities);
                 }
             });
         }
-        // 7. Save IncidentStatusLogEntities if present
+        // ✅ Save IncidentStatusLogEntities if present
         if (dto.getIncidentStatusLogData() != null && !dto.getIncidentStatusLogData().isEmpty()) {
             List<IncidentStatusLogEntity> logEntities =
-                    IncidentTransformer.toStatusLogEntities(dto.getIncidentStatusLogData(), incidentPk);
-            logEntities.forEach(e -> e.setIncidentPk(incidentMasterEntity)); // Set FK
+                    IncidentTransformer.toStatusLogEntities(dto.getIncidentStatusLogData(), id);
+            logEntities.forEach(e -> {
+                e.setId(UUID.randomUUID().getMostSignificantBits()); // Generate child PK
+                e.setId(id); // Set FK // FK
+            });
             incidentStatusLogRepository.saveAll(logEntities);
         }
-        log.info("Incident saved successfully with incidentId: {}", incidentId);
+        log.info("Incident saved successfully with IncidentId: {} and IncidentPk: {}", incidentId, id);
     }
-
-
-        // ✅ Save Status Logs
-       /* if (dto.getStatusLookup() != null && !dto.getStatusLookup().isEmpty()) {
-            List<IncidentStatusLogEntity> logEntities =
-                    IncidentTransformer.toStatusLogEntities(dto.getStatusLookup(), incidentPk);
-            incidentStatusLogRepository.saveAll(logEntities);*/
-
-
-
     @Override
     public List<String> getReasons() {
         return Arrays.asList(
@@ -84,5 +91,4 @@ public class IncidentServiceImpl implements IncidentService {
     public List<String> getSeverities() {
         return Arrays.asList("Low", "Medium", "High", "Critical");
     }
-
 }
