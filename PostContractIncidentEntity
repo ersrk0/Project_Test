@@ -1,0 +1,71 @@
+package in.gov.gem.app.incident.domain.entity;
+import in.gov.gem.app.incident.domain.entity.DebarmentDetailEntity;
+import in.gov.gem.app.service.core.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.UUID;
+@Entity
+@Table(name = "post_contract_incident")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class PostContractIncidentEntity extends BaseEntity {
+    @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "incident_master_fk",insertable = false,updatable = false, nullable = false)
+    private Long incidentMasterFk;
+    @Column(name = "auction_id")
+    private String auctionId;
+    @Column(name = "bid_id")
+    private String bidId;
+    @Column(name = "order_id")
+    private String orderId;
+    @Column(name = "product_id")
+    private String productId;
+    @Column(name = "product_name")
+    private String productName;
+    @Column(name = "contract_no")
+    private String contractNo;
+    @Column(name = "invoice_id")
+    private String invoiceId;
+    @Column(name = "trader_id")
+    private String traderId;
+    @Column(name = "pan_no")
+    private String panNo;
+    @Column(name = "is_debarred")
+    private Boolean isDebarred;
+    @Column(name = "created_by")
+    private String createdBy;
+    @Column(name = "created_at")
+    private Timestamp createdAt;
+    @Column(name = "updated_by")
+    private String updateBy;
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+    /*@Column(name = "deleted_at")
+    private Timestamp deletedAt;*/
+    @Column(name = "channel_id")
+    private String channelId;
+    @Column(name = "created_by_app_version")
+    private String createdByAppVersion;
+    @Column(name = "updated_by_app_version")
+    private String updatedByAppVersion;
+    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DebarmentDetailEntity> debarmentDetail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "incident_master_fk",insertable = false,updatable = false, nullable = false)
+    private IncidentMasterEntity incidentMaster;
+}
