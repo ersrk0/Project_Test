@@ -1,0 +1,578 @@
+/*
+
+ * This source code and all associated intellectual property rights are
+
+ * exclusively owned by Government e-Marketplace (GeM) and are protected
+
+ * under applicable intellectual property laws. Any unauthorized use,
+
+ * reproduction, modification, or distribution of this code, in whole or
+
+ * in part, is strictly prohibited without the express prior written
+
+ * consent of GeM.
+
+ */
+
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import java.util.UUID;
+
+/**
+
+ * The type Pre contract incident entity.
+
+ */
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@Entity
+
+@Table(name = "pre_contract_incident", schema = "incident_mgmt")
+
+public class PreContractIncidentEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", nullable = false, updatable = false)
+
+    private Long id;
+
+    @Column(name = "incident_master_fk", nullable = false)
+
+    private Long incidentMasterFk;
+
+    @Column(name = "trader_id")
+
+    private String traderId;
+
+    @Column(name = "category_code")
+
+    private UUID categoryCode;
+
+    @Column(name = "product_id")
+
+    private String productId;
+
+    @Column(name = "catalog_id")
+
+    private String catalogId;
+
+    @Column(name = "comp_id")
+
+    private String compId;
+
+    @Column(name = "sku_id")
+
+    private String skuId;
+
+    @Column(name = "brand_id")
+
+    private String brandId;
+
+    @Column(name = "service_id")
+
+    private String serviceId;
+
+}
+ 
+/*
+
+ * This source code and all associated intellectual property rights are
+
+ * exclusively owned by Government e-Marketplace (GeM) and are protected
+
+ * under applicable intellectual property laws. Any unauthorized use,
+
+ * reproduction, modification, or distribution of this code, in whole or
+
+ * in part, is strictly prohibited without the express prior written
+
+ * consent of GeM.
+
+ */
+
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+/**
+
+ * The type Post contract incident entity.
+
+ */
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@Entity
+
+@Table(name = "post_contract_incident", schema = "incident_mgmt")
+
+public class PostContractIncidentEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "incident_master_fk", nullable = false)
+
+    private Long incidentMasterFk;
+
+    @Column(name = "auction_id")
+
+    private String auctionId;
+
+    @Column(name = "bid_id")
+
+    private String bidId;
+
+    @Column(name = "contract_no")
+
+    private String contractNo;
+
+    @Column(name = "invoice_id")
+
+    private String invoiceId;
+
+    @Column(name = "trader_id")
+
+    private String traderId;
+
+    @Column(name = "pan_no")
+
+    private String panNo;
+
+    @Column(name = "is_debarred")
+
+    private Boolean isDebarred;
+
+}
+ 
+/*
+
+ * This source code and all associated intellectual property rights are
+
+ * exclusively owned by Government e-Marketplace (GeM) and are protected
+
+ * under applicable intellectual property laws. Any unauthorized use,
+
+ * reproduction, modification, or distribution of this code, in whole or
+
+ * in part, is strictly prohibited without the express prior written
+
+ * consent of GeM.
+
+ */
+
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+import java.util.UUID;
+
+/**
+
+ * The type Incident master entity.
+
+ */
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@Entity
+
+@Table(name = "incident_master", schema = "incident_mgmt")
+
+public class IncidentMasterEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "incident_id", unique = true, nullable = false)
+
+    private UUID incidentId;
+
+    @Column(name = "incident_type_lookup")
+
+    private String incidentTypeLookup;
+
+    @Column(name = "module_code")
+
+    private String moduleCode;
+
+    @Column(name = "raised_by_id")
+
+    private String raisedById;
+
+    @Column(name = "raised_by_role_lookup")
+
+    private String raisedByRoleLookup;
+
+    @Column(name = "raised_against_type_lookup")
+
+    private String raisedAgainstTypeLookup;
+
+    @Column(name = "raised_against_role_lookup")
+
+    private String raisedAgainstRoleLookup;
+
+    @Column(name = "incident_reason_lookup")
+
+    private String incidentReasonLookup;
+
+    @Column(name = "issue_type_lookup")
+
+    private String issueTypeLookup;
+
+    @Column(name = "incident_title")
+
+    private String incidentTitle;
+
+    @Column(name = "incident_description")
+
+    private String incidentDescription;
+
+    @Column(name = "status_lookup")
+
+    private String statusLookup;
+
+    @Column(name = "severity_lookup")
+
+    private String severityLookup;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+
+    private LocalDateTime updatedAt;
+
+}
+ 
+/*
+
+ * This source code and all associated intellectual property rights are
+
+ * exclusively owned by Government e-Marketplace (GeM) and are protected
+
+ * under applicable intellectual property laws. Any unauthorized use,
+
+ * reproduction, modification, or distribution of this code, in whole or
+
+ * in part, is strictly prohibited without the express prior written
+
+ * consent of GeM.
+
+ */
+
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import lombok.experimental.SuperBuilder;
+
+import java.util.Date;
+
+import java.util.UUID;
+
+/**
+
+ * The type Debarment detail entity.
+
+ */
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@SuperBuilder
+
+@Entity
+
+@Table(name = "debarment_detail", schema = "incident_mgmt")
+
+public class DebarmentDetailEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "debarment_id")
+
+    private UUID debarmentId;
+
+    @Column(name = "post_contract_incident_fk", nullable = false)
+
+    private Long postContractIncidentFk;
+
+    @Column(name = "debarment_clause_lookup")
+
+    private String debarmentClauseLookup;
+
+    @Column(name = "debarment_start_date")
+
+    @Temporal(TemporalType.DATE)
+
+    private Date debarmentStartDate;
+
+    @Column(name = "debarment_end_date")
+
+    @Temporal(TemporalType.DATE)
+
+    private Date debarmentEndDate;
+
+    @Column(name = "competent_authority_name")
+
+    private String competentAuthorityName;
+
+    @Column(name = "competent_authority_designation")
+
+    private String competentAuthorityDesignation;
+
+}
+ 
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import lombok.experimental.SuperBuilder;
+
+import java.util.UUID;
+
+@Entity
+
+@Table(name = "incident_doc_master", schema = "incident_mgmt")
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@SuperBuilder
+
+public class IncidentDocMasterEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "doc_id", nullable = false)
+
+    private UUID docId;
+
+    @Column(name = "incident_master_fk", nullable = false)
+
+    private Long incidentMasterFk;
+
+    @Column(name = "incident_attachment_fk")
+
+    private Long incidentAttachmentFk;
+
+}
+ 
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import lombok.experimental.SuperBuilder;
+
+import java.math.BigInteger;
+
+@Entity
+
+@Table(name = "incident_attachment", schema = "incident_mgmt")
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@SuperBuilder
+
+public class IncidentAttachmentEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "incident_doc_master_fk", nullable = false)
+
+    private Long incidentDocMasterFk;
+
+    @Column(name = "file_name")
+
+    private String fileName;
+
+    @Column(name = "file_type_lookup")
+
+    private String fileTypeLookup;
+
+    @Column(name = "file_path")
+
+    private String filePath;
+
+    @Column(name = "file_size")
+
+    private BigInteger fileSize;
+
+}
+ 
+package in.gov.gem.app.incident.domain.entity;
+
+import in.gov.gem.app.service.core.entity.BaseEntity;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
+
+import java.util.UUID;
+
+@Entity
+
+@Table(name = "incident_status_log", schema = "incident_mgmt")
+
+@Getter
+
+@Setter
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+@SuperBuilder
+
+public class IncidentStatusLogEntity extends BaseEntity {
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id", updatable = false, nullable = false)
+
+    private Long id;
+
+    @Column(name = "log_id")
+
+    private UUID logId;
+
+    @Column(name = "post_contract_incident_fk")
+
+    private Long postContractIncidentFk;
+
+    @Column(name = "incident_doc_master_fk")
+
+    private Long incidentDocMasterFk;
+
+    @Column(name = "action_type_lookup")
+
+    private String actionTypeLookup;
+
+    @Column(name = "previous_status_lookup")
+
+    private String previousStatusLookup;
+
+    @Column(name = "current_status_lookup")
+
+    private String currentStatusLookup;
+
+    @Column(name = "action_by_type_lookup")
+
+    private String actionByTypeLookup;
+
+    @Column(name = "action_by_id")
+
+    private String actionById;
+
+    @Column(name = "remarks")
+
+    private String remarks;
+
+    @Column(name = "incident_master_fk", nullable = false)
+
+    private Long incidentMasterFk;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+
+    private LocalDateTime updatedAt;
+
+}
+ 
