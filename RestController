@@ -1,0 +1,22 @@
+package in.gov.gem.app.incident.controller;
+import in.gov.gem.app.incident.dto.request.SaveIncidentRequest;
+import in.gov.gem.app.incident.dto.request.TemplateType;
+import in.gov.gem.app.incident.dto.response.IncidentDetailResponse;
+import in.gov.gem.app.incident.dto.response.SaveIncidentResponse;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/incident/public")
+public interface IIncidentController {
+  @PostMapping("/save")
+  ResponseEntity<SaveIncidentResponse> save(@RequestBody SaveIncidentRequest request);
+ /* @GetMapping(value="/template", produces="text/csv")
+  ResponseEntity<Resource> template(@RequestParam("type") TemplateType type);
+  @GetMapping("/{incidentId}")
+  ResponseEntity<IncidentDetailResponse> getByIncidentId(@PathVariable UUID incidentId);
+
+*/
+}
