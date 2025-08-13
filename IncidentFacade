@@ -1,0 +1,135 @@
+package in.gov.gem.app.incident.facade.impl;
+
+
+import in.gov.gem.app.incident.domain.entity.*;
+import in.gov.gem.app.incident.dto.request.IncidentDocMasterDTO;
+import in.gov.gem.app.incident.dto.request.SaveIncidentRequest;
+import in.gov.gem.app.incident.dto.request.TemplateType;
+import in.gov.gem.app.incident.dto.response.IncidentDetailResponse;
+import in.gov.gem.app.incident.dto.response.SaveIncidentResponse;
+import in.gov.gem.app.incident.facade.IIncidentFacade;
+import in.gov.gem.app.incident.service.*;
+import in.gov.gem.app.incident.transformer.*;
+import in.gov.gem.app.incident.utility.CsvTemplateUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class IncidentFacade implements IIncidentFacade {
+
+  private final IIncidentMasterService incidentMasterService;
+  private final IPreContractIncidentService preContractService;
+  private final IPostContractIncidentService postContractService;
+  private final IDebarmentDetailService debarmentService;
+  private final IIncidentDocMasterService docMasterService;
+  private final IIncidentAttachmentService attachmentService;
+  private final IIncidentStatusLogService statusLogService;
+
+  private final IncidentMasterTransformer masterTx;
+  private final PreContractIncidentTransformer preTx;
+  private final PostContractIncidentTransformer postTx;
+  private final DebarmentDetailTransformer debarTx;
+  private final IncidentDocMasterTransformer docTx;
+  private final IncidentAttachmentTransformer attachTx;
+  private final IncidentStatusLogTransformer statusTx;
+
+  @Override
+  @Transactional
+  public SaveIncidentResponse saveIncident(SaveIncidentRequest req) {
+    if(req==null || req.getMaster()==null){
+      throw new IllegalArgumentException("master block is required");
+    }
+    UUID incidentId = UUID.randomUUID();
+    IncidentMasterEntity master = masterTx.toEntity(req.getMaster(), incidentId);
+    master = incidentMasterService.save(master);
+
+    // Optional children
+    PreContractIncidentEntity pre = null;
+    PostContractIncidentEntity post = null;
+    IncidentDocMasterEntity doc = null;
+    IncidentAttachmentEntity attach = null;
+
+    if(Objects.nonNull(req.getPreContract())){
+      pre = preContractService.save(preTx.toEntity(req.getPreContract(), master.getId()));
+    }
+    if(Objects.nonNull(req.getPostContract())){
+      post = postContractService.save(postTx.toEntity(req.getPostContract(), master.getId()));
+    }
+    if(Objects.nonNull(req.getDocMaster())){
+      doc = docMasterService.save(docTx.toEntity(req.getDocMaster(), master.getId()));
+    }
+    if(Objects.nonNull(req.getAttachment())){
+      if(doc==null){
+        doc = docMasterService.save(docTx.toEntity(new IncidentDocMasterDTO(), master.getId()));
+      }
+      attach = attachmentService.save(attachTx.toEntity(req.getAttachment(), doc.getId()));
+    }
+    if(Objects.nonNull(req.getDebarment())){
+      if(post==null){
+        throw new IllegalArgumentException("debarment requires postContract data");
+      }
+      debarmentService.save(debarTx.toEntity(req.getDebarment(), post.getId()));
+    }
+    if(Objects.nonNull(req.getStatusLog())){
+      statusLogService.save(statusTx.toEntity(req.getStatusLog(), master.getId()));
+    }
+
+    return SaveIncidentResponse.builder()
+        .incidentId(incidentId)
+        .incidentMasterPk(master.getId())
+        .status("SAVED")
+        .build();
+  }
+
+  @Override
+  public ResponseEntity<Resource> downloadTemplate(TemplateType type) {
+    byte[] csv = CsvTemplateUtil.buildTemplate(type).getBytes(StandardCharsets.UTF_8);
+    ByteArrayResource res = new ByteArrayResource(csv);
+    String file = type==TemplateType.PRE_CONTRACT? "pre_contract_incident_template.csv"
+                                                : "post_contract_incident_template.csv";
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentDisposition(ContentDisposition.attachment().filename(file).build());
+    headers.setContentType(new MediaType("text","csv"));
+    headers.setContentLength(csv.length);
+    return ResponseEntity.ok().headers(headers).body(res);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public IncidentDetailResponse getIncidentById(UUID incidentId) {
+    IncidentMasterEntity master = incidentMasterService.findByIncidentId(incidentId)
+      .orElseThrow(() -> new RuntimeException("Incident not found"));
+    PreContractIncidentEntity pre = preContractService.findByIncidentMasterFk(master.getId());
+    PostContractIncidentEntity post = postContractService.findByIncidentMasterFk(master.getId());
+    List<IncidentDocMasterEntity> docs = docMasterService.findAllByIncidentMasterFk(master.getId());
+    List<IncidentAttachmentEntity> attachments = docs.stream()
+        .map(doc -> attachmentService.findByIncidentDocMasterFk(doc.getId()))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    DebarmentDetailEntity deb = (post != null) ? debarmentService.findByPostContractIncidentFk(post.getId()) : null;
+    IncidentStatusLogEntity latestLog = statusLogService.findLatestByIncidentMasterFk(master.getId());
+
+    return IncidentDetailResponse.builder()
+      .incidentId(incidentId)
+      .master(masterTx.toDto(master))
+      .preContract(pre != null ? preTx.toDto(pre) : null)
+      .postContract(post != null ? postTx.toDto(post) : null)
+      .docMaster(!docs.isEmpty() ? docs.stream().map(docTx::toDto).collect(Collectors.toList()) : null)
+      .debarment(deb != null ? debarTx.toDto(deb) : null)
+      .statusLog(latestLog != null ? statusTx.toDto(latestLog) : null)
+      .build();
+  }
+}
