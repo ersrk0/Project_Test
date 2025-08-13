@@ -1,0 +1,33 @@
+---
+spring:
+  config:
+    "import[0]": ${APPCONFIG_PATH}/global/application-global-dev-redis-config.yaml
+    "import[1]": aws-secretsmanager:dev/system-client/accesskeys
+url:
+  auth-bypass: /public/, /swagger-ui/, /api-docs
+  refreshSessionUrlOnTokenExpiryCheck: /v1/session/refresh-session
+  permission:
+    db:
+      api: https://api-dev.internal.gem.gov.in/iam/v1/auth/public/data-by-url
+  public-key: https://api-dev.internal.gem.gov.in/iam/v1/auth/public/realm-public-key
+  public-token: https://api-dev.internal.gem.gov.in/iam/v1/auth/public/token
+cors:
+  allowed-origins: >
+    http://localhost:3000, http://192.168.135.11,
+    http://192.168.141.106, http://192.168.141.245:80, http://192.168.135.24:80,
+    http://localhost:8082, http://localhost, https://dev.internal.gem.gov.in,
+    https://api-dev.internal.gem.gov.in
+log:
+  filename: gemapp
+security:
+  allowed-methods: |
+    GET, POST, PUT, PATCH, DELETE
+system:
+  client-secret: ${clientSecret}
+  client-id: ${clientId}
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+tracing:
+  url: http://192.168.135.109:31830
